@@ -1,6 +1,6 @@
 import time
 from datetime import timedelta
-from typing import List
+from typing import List, Dict
 
 
 class Ingredient:
@@ -27,7 +27,7 @@ class Recipe:
         self.ingredients = []
         self.steps: List[Step] = []
         self.prep_time = timedelta(minutes=0)
-        self.dependency = {}
+        self.dependency: Dict[Step, List[Step]] = {}
 
     def update_prep_time(self, delta: timedelta):
         self.prep_time += delta
@@ -70,8 +70,14 @@ class Recipe:
             child_list.append(self.steps[parent_idx])
             self.dependency[self.steps[child_idx]] = child_list
 
+    def default_dependency(self):
+        for i in range(len(self.steps) - 1):
+            self.dependency[self.steps[i + 1]].append(self.steps[i])
+
     def print_recipe(self):
         print(f"Recipe for {self.dish_name}")
+        print(f"Total prep time: {self.prep_time}")
+        print()
         print("Ingredients:")
         for i, ingredient in enumerate(self.ingredients):
             print(f"{i}: {ingredient.name}, {ingredient.quantity} {ingredient.unit}")
@@ -79,7 +85,7 @@ class Recipe:
         for i, step in enumerate(self.steps):
             print(
                 f"{i}: {step.instruction} ({step.estimated_time}), utensil: {step.utensil}, hands-off: {step.is_hands_off}")
-        print(f"Total prep time: {self.prep_time}")
+
 
     def shortest_distance_to_handsoff(self, idx: int):
         t = timedelta(minutes=0)
